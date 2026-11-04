@@ -77,7 +77,8 @@ INSTALLED_APPS = [
     # Meu apps
     'blog',
     'site_setup',
-    'avaliacoes', 
+    'avaliacoes',
+    'estoque',
 
     # Summernote
     'django_summernote',

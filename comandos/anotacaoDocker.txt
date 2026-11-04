@@ -101,3 +101,12 @@ certifique-se que o Docker Desktop está aberto e
 funcionando (ícone na bandeja do Windows com status "Docker is running").
 
 Se der erro, um wsl --shutdown e reiniciar o Docker Desktop costuma ajudar.
+=====================================================================
+Vamos fixar os três comandos principais
+Comando	Para que serve
+docker compose up -d --build  Construir as imagens e iniciar os serviços em
+segundo plano.
+docker compose ps	Consultar o estado dos serviços.
+docker compose down	Parar e remover os contêineres e a rede do projeto.
+Uma dica para memorizar: UP sobe, PS consulta, DOWN desce.
+========================================================================

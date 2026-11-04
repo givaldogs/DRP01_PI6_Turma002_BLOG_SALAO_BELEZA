@@ -1,0 +1,81 @@
+{% extends 'estoque/base_estoque.html' %}
+
+{% block title %}Consulta de Estoque{% endblock %}
+
+{% block menu_estoque %}ativo{% endblock %}
+
+{% block content %}
+
+<h2 class="titulo-pagina">Consulta de Estoque</h2>
+
+<div class="indicadores">
+
+    <div class="cartao">
+        <h3>Produtos com estoque cadastrado</h3>
+        <p class="numero">{{ total_produtos }}</p>
+    </div>
+
+    <div class="cartao">
+        <h3>Estoques no nível mínimo ou abaixo</h3>
+        <p class="numero">{{ total_estoques_baixos }}</p>
+    </div>
+
+</div>
+
+<div class="tabela-container">
+
+    <table class="tabela-estoque">
+
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Produto</th>
+                <th>Categoria</th>
+                <th>Marca</th>
+                <th>Filial</th>
+                <th>Quantidade</th>
+                <th>Unidade</th>
+                <th>Estoque mínimo</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for estoque in estoques %}
+
+            <tr>
+                <td>{{ estoque.produto.codigo }}</td>
+                <td>{{ estoque.produto.nome }}</td>
+                <td>{{ estoque.produto.categoria.nome }}</td>
+
+                <td>
+                    {% if estoque.produto.marca %}
+                    {{ estoque.produto.marca.nome }}
+                    {% else %}
+                    Não informada
+                    {% endif %}
+                </td>
+
+                <td>{{ estoque.filial.nome }}</td>
+                <td>{{ estoque.quantidade }}</td>
+                <td>{{ estoque.produto.unidade_medida.sigla }}</td>
+                <td>{{ estoque.estoque_minimo }}</td>
+            </tr>
+
+            {% empty %}
+
+            <tr>
+                <td colspan="8" class="sem-registros">
+                    Nenhum registro de estoque encontrado.
+                </td>
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}

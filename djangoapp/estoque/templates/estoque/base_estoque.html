@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}Controle de Estoque{% endblock %}</title>
+
+    <link rel="stylesheet" href="{% static 'estoque/css/estoque.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <header class="topo">
+        <div class="container">
+            <h1>Maria Salão de Beleza</h1>
+            <p>Sistema de Controle de Estoque</p>
+        </div>
+    </header>
+
+    <nav class="menu">
+        <div class="container">
+
+            <a href="{% url 'estoque:lista_estoque' %}" class="{% block menu_estoque %}{% endblock %}">
+                Estoque
+            </a>
+
+            <a href="{% url 'estoque:registrar_movimentacao' %}" class="{% block menu_movimentacao %}{% endblock %}">
+                Movimentar Estoque
+            </a>
+
+            <a href="/admin/">Administração</a>
+
+        </div>
+    </nav>
+
+    <main class="container conteudo">
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="mensagem mensagem-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+
+    </main>
+
+    <footer class="rodape">
+        <p>Maria Salão de Beleza - Controle de Estoque</p>
+    </footer>
+</body>
+
+</html>

@@ -1,0 +1,39 @@
+{% extends 'estoque/base_estoque.html' %}
+
+{% block title %}Movimentação de Estoque{% endblock %}
+
+{% block menu_movimentacao %}ativo{% endblock %}
+
+{% block content %}
+
+<h2 class="titulo-pagina">Registrar Movimentação</h2>
+
+<div class="cartao">
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        {{ form.non_field_errors }}
+
+        <div class="formulario">
+            {{ form.as_p }}
+        </div>
+
+        <div class="acoes-formulario">
+
+            <button type="submit" class="botao">
+                Registrar movimentação
+            </button>
+
+            <a href="{% url 'estoque:lista_estoque' %}" class="botao botao-voltar">
+                Voltar para consulta de estoque
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

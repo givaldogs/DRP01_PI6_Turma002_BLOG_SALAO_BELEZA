@@ -1,0 +1,277 @@
+
+Vem e Segue-me - Jeremias 1–3; 7; 16–18; 20 - Vaso na Mãos do Oleiro
+https://www.youtube.com/watch?v=DjlhfEiIAtU
+===========================================
+concurso TJ portugues
+https://www.youtube.com/watch?v=uKdN4MpL8tw
+----------------------------------------------------
+
+type djangoapp\estoque\apps.py
+Perfeito! O arquivo `apps.py` está correto:
+
+```
+class EstoqueConfig(AppConfig):    default_auto_field = 'django.db.models.BigAutoField'    name = 'estoque'
+```
+
+O Django reconhece o aplicativo pelo nome `estoque`. Podemos seguir para a criação dos modelos.
+
+## Etapa 2 — Preparar o modelo de dados
+
+Vamos começar pelo arquivo:
+
+`djangoapp\estoque\models.py`
+
+Como o sistema terá matriz e filiais, é importante separar o cadastro do produto do saldo do produto em cada filial. Assim, o mesmo shampoo pode existir em várias unidades, cada uma com sua quantidade disponível.
+
+A primeira versão terá estes seis modelos:
+
+- `Empresa`
+- `Filial`
+- `Categoria`
+- `Produto`
+- `Estoque`
+- `MovimentacaoEstoque`
+
+Antes de escrevermos o código, quero confirmar um detalhe que afeta o controle de acesso: você quer que cada funcionário tenha acesso apenas à sua filial, enquanto um administrador possa consultar todas as filiais?
+
+Essa é a opção que recomendo para um sistema que pode crescer no futuro.
+==============================================================================
+Minha recomendação é adotar exatamente essa estrutura: cada funcionário acessa apenas a filial em que trabalha, enquanto o administrador autorizado pode consultar e gerenciar todas as filiais. Esse é um modelo de controle de acesso bastante adequado para um sistema de estoque com matriz e filiais.
+
+Vou explicar como eu projetaria isso para o seu PI6.
+
+## 1. Como funcionaria o acesso ao sistema
+
+Administrador geral
+
+Todas as filiais
+
+Cadastra filiais e produtos, consulta os estoques, gerencia usuários e acompanha relatórios consolidados.
+
+Gerente de filial
+
+Consulta o estoque da sua unidade, registra entradas e saídas e acompanha produtos com estoque baixo.
+
+Funcionário
+
+Consulta produtos e registra apenas as operações autorizadas para sua filial.
+
+## 2. Por que considero esse o modelo mais adequado?
+
+- Segurança: um funcionário de uma unidade não deve conseguir alterar o estoque de outra.
+- Organização: cada filial tem seu próprio saldo de produtos.
+- Rastreabilidade: cada movimentação registra o usuário responsável, a data e o motivo.
+- Crescimento: você começa com uma unidade e pode cadastrar outras sem reconstruir o sistema.
+
+Um detalhe importante: não basta esconder as outras filiais na tela. O Django também precisa validar as permissões no servidor, inclusive quando alguém tenta acessar uma URL diretamente.
+
+## 3. Como vamos implementar no Django
+
+Vamos aproveitar o sistema de autenticação que seu projeto já possui e relacionar os usuários às filiais. Não será necessário criar um sistema de login do zero.
+
+Minha proposta é desenvolver por etapas:
+
+1. Criar os modelos de empresa, filial, categoria, produto, estoque e movimentação.
+2. Configurar os modelos no painel administrativo do Django.
+3. Criar as regras de acesso por perfil e filial.
+4. Implementar entradas, saídas, consumo interno, vendas e transferências.
+5. Criar consultas e relatórios de estoque baixo.
+
+Minha decisão para o PI6: vamos usar esse modelo de permissões desde o início, mesmo que inicialmente você cadastre apenas uma filial. Isso evita retrabalho e deixa o projeto mais consistente.
+
+O próximo passo será implementar os modelos no arquivo `djangoapp\estoque\models.py`, começando pela estrutura dos dados.
+=============================================================================
+Claro! Pode fazer sua pausa tranquilamente.
+
+Quando voltar, continuaremos exatamente de onde paramos no projeto PI6 — Blog do Salão de Beleza com Controle de Estoque.
+
+Já definimos que o sistema terá:
+
+- Cadastro de empresa, matriz e filiais.
+- Produtos para uso interno e para revenda.
+- Estoque separado por filial.
+- Registro de entradas, saídas e transferências.
+- Perfis de acesso para administrador, gerente e funcionário.
+
+Também confirmamos que o aplicativo `estoque` está criado no local correto e registrado no `settings.py`, e que o Django passou na verificação sem erros.
+=============================================================================
+
+## Etapa 2 — Criar os três primeiros modelos
+
+No VS Code, substitua o conteúdo atual de `djangoapp/estoque/models.py` pelo código abaixo:
+
+```
+from django.db import modelsclass Empresa(models.Model):    nome = models.CharField(max_length=150)    cnpj = models.CharField(max_length=18, unique=True, blank=True, null=True)    ativa = models.BooleanField(default=True)    def __str__(self):        return self.nomeclass Filial(models.Model):    empresa = models.ForeignKey(        Empresa,        on_delete=models.PROTECT,        related_name='filiais'    )    nome = models.CharField(max_length=100)    codigo = models.CharField(max_length=20)    endereco = models.CharField(max_length=200, blank=True)    ativa = models.BooleanField(default=True)    class Meta:        unique_together = ('empresa', 'codigo')    def __str__(self):        return f'{self.nome} - {self.empresa.nome}'class Categoria(models.Model):    nome = models.CharField(max_length=100, unique=True)    descricao = models.TextField(blank=True)    ativa = models.BooleanField(default=True)    def __str__(self):        return self.nome
+```
+
+Salve o arquivo com `Ctrl + S`.
+
+## Entendendo o código
+
+### 1. `Empresa`
+
+Representa a empresa proprietária do salão.
+
+- `nome`: nome da empresa.
+- `cnpj`: identificação da empresa, opcional neste primeiro momento.
+- `ativa`: permite marcar a empresa como ativa ou inativa.
+
+### 2. `Filial`
+
+Representa a matriz ou uma unidade da empresa.
+
+O trecho:
+
+```
+empresa = models.ForeignKey(    Empresa,    on_delete=models.PROTECT,    related_name='filiais')
+```
+
+estabelece uma relação entre a filial e a empresa.
+
+- `ForeignKey`: relaciona um registro com outro.
+- `Empresa`: indica a qual empresa a filial pertence.
+- `on_delete=models.PROTECT`: impede excluir uma empresa enquanto houver filiais vinculadas.
+- `related_name='filiais'`: permite consultar as filiais de uma empresa por meio de `empresa.filiais.all()`.
+
+O `unique_together` evita que a mesma empresa tenha duas filiais com o mesmo código.
+
+### 3. `Categoria`
+
+Organiza os produtos, por exemplo, em categorias como esmaltes, shampoos, tinturas e materiais descartáveis.
+
+O campo `unique=True` impede cadastrar duas categorias com exatamente o mesmo nome.
+
+## Próximo passo
+
+Depois de salvar, abra o terminal integrado do VS Code em Terminal → New Terminal e execute:
+
+```
+.\venv\Scripts\python.exe djangoapp\manage.py check
+```
+
+Se aparecer `System check identified no issues`, envie o resultado aqui. Ainda não vamos criar as migrações: primeiro vamos validar o código e depois implementar os modelos de produtos e estoque.
+===================================================================
+#-> comando abaixo é pra confirmar a configuração do banco. 
+# se é db.sqlite3 ou PostgreSQL
+.\venv\Scripts\python.exe djangoapp\manage.py shell -c "from django.conf import settings; print('Banco configurado:', settings.DATABASES['default']['ENGINE']); print('Nome do banco:', settings.DATABASES['default']['NAME'])"
+===================================================
+docker compose exec djangoapp python manage.py makemigrations --check --dry-run
+O que ele faz?
+- makemigrations: verifica alterações nos modelos que exigiriam uma nova migração.
+- --check: retorna um erro se houver migrações pendentes.
+- --dry-run: apenas simula a operação; não cria arquivos de migração.
+Esse comando não altera o banco de dados.
+======================================================================
+Esse comando verifica configurações e problemas comuns no projeto, sem alterar o banco.
+docker compose exec djangoapp python manage.py check
+=================================================================
+Esse comando consulta os nomes de usuário e os indicadores de acesso
+administrativo. 
+Não retorna senhas, mas pode mostrar nomes de usuários; 
+se preferir, pode ocultá-los antes de compartilhar o resultado.
+
+docker compose exec djangoapp python manage.py shell -c "from django.contrib.auth import get_user_model; print(list(get_user_model().objects.values_list('username', 'is_staff', 'is_superuser')))"
+=======================================================
+********* alterar o modelo de dados
+Eu acho uma excelente ideia! Inclusive, considero que esse aprimoramento vai deixar o nosso Projeto Integrador VI (PI6) mais completo, realista e útil para a administração de um salão de beleza.
+
+Você levantou uma questão importante: o sistema precisa controlar produtos reais, e não apenas nomes genéricos.
+
+## 1. O que eu sugiro acrescentar ao cadastro de produtos
+
+## Exemplo de cadastro de produto
+
+Imagine que estamos cadastrando um shampoo para revenda.
+
+[Shampoo Preenchedor L'Oréal Paris Elseve - Hidra Hialurônico - Época Cosméticos | Época Cosméticos](https://images.openai.com/static-rsc-4/RhsGMCSvuB2jpYbmQls5-oG_taWMLYl8SDQBJ9kj-OGtS8Kpo2uf_tXXK8lC0gfIHrw23Z82bYU7lIJVnRITK5dAHod479QrsCPymN3avrLQtd-Yozgh6gM11BXdTs5OuYCcmKn5W8x6dpVkgf7DVf3gLQEqwB1ZkgXf-OqHEwU?purpose=inline)
+
+Shampoo Elseve Hidra Hialurônico
+
+Exemplo ilustrativo
+
+Categoria: Produtos capilares
+
+Marca: Elseve
+
+Embalagem: 400 ml
+
+Unidade de controle: frasco
+
+Tipo: Revenda
+
+Eu acrescentaria estes campos ao modelo `Produto`:
+
+| Campo             | Para que serve                                                             |
+| ----------------- | -------------------------------------------------------------------------- |
+| Marca             | Diferenciar fabricantes e linhas de produtos                               |
+| Tamanho/embalagem | Identificar frasco de 400 ml, pacote de 100 g, caixa com 100 unidades etc. |
+| Unidade de medida | Controlar em unidades, gramas, mililitros, litros ou quilogramas           |
+| Código            | Identificar cada produto individualmente, sem duplicidade                  |
+
+O código único já existe no nosso modelo. Os outros campos ainda precisarão ser implementados.
+
+## 2. Também precisamos pensar na quantidade
+
+A unidade de medida precisa ser coerente com o produto:
+
+- Shampoo para revenda: 12 frascos de 400 ml.
+- Algodão para uso interno: 5 pacotes de 100 g.
+- Luvas descartáveis: 3 caixas com 100 unidades.
+
+Para o projeto, recomendo controlar cada embalagem como uma unidade de estoque. Assim, não confundimos, por exemplo, 12 frascos com 12 mililitros.
+
+## 3. Como vamos fazer isso no Django?
+
+Minha sugestão é implementar os aprimoramentos antes de cadastrar vários produtos de teste:
+
+1. Atualizar o modelo `Produto`.
+2. Criar uma nova migração do Django.
+3. Aplicar a migração ao PostgreSQL pelo Docker.
+4. Atualizar o painel administrativo.
+5. Cadastrar produtos específicos e testar o estoque por filial.
+
+Como já verificamos que a migração inicial do estoque está aplicada, faremos isso criando uma nova migração, sem apagar a anterior nem recriar o banco.
+
+Eu seguiria por esse caminho. Primeiro vamos ajustar o modelo de dados, depois continuamos os cadastros. Assim evitamos retrabalho e construímos uma solução mais consistente para o PI6.
+=========================================
+
+class UnidadeMedida(models.Model):
+    nome = models.CharField(max_length=50, unique=True)
+    sigla = models.CharField(max_length=10, unique=True)
+    ativa = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f'{self.nome} ({self.sigla})'
+
+O que cada campo faz?
+- nome: nome da unidade, como Frasco, Pacote ou Quilograma.
+- sigla: abreviação, como FR, PCT ou KG.
+- ativa: indica se a unidade está disponível para novos cadastros.
+- __str__: define como a unidade será apresentada no Django Admin.
+===============================================
+executacao no Docker
+docker compose exec djangoapp python manage.py makemigrations estoque
+docker compose exec djangoapp python manage.py migrate estoque
+docker compose exec djangoapp python manage.py check
+==============================================
+Iniciar o projeto PI6
+-----------------------
+docker compose up -d
+docker compose ps
+Vamos confirmar que o projeto continua sem erros. No mesmo terminal, execute:
+docker compose exec djangoapp python manage.py check
+==========================================
+docker compose exec djangoapp python manage.py shell -c "from estoque.services import registrar_movimentacao; print('Serviço de movimentação importado com sucesso!')"
+========================================================
+Próxima etapa — Consultar o estoque atual
+No terminal PowerShell, na pasta principal do PI6, execute este comando:
+docker compose exec djangoapp python manage.py shell -c "from estoque.models import Estoque; print(list(Estoque.objects.values('id', 'produto__nome', 'filial__nome', 'quantidade')))"
+===========================================================================
+adicionar item no estoque
+docker compose exec djangoapp python manage.py shell -c "from estoque.services import registrar_movimentacao; m = registrar_movimentacao(estoque_id=1, tipo='ENTRADA', quantidade=2, motivo='Teste de funcionamento do serviço'); print('Movimentação registrada:', m)"
+=========================================================================
+conferir o estoque:
+docker compose exec djangoapp python manage.py shell -c "from estoque.models import Estoque, MovimentacaoEstoque; print('ESTOQUE:', list(Estoque.objects.values('produto__nome', 'quantidade', 'estoque_minimo'))); print('HISTÓRICO:', list(MovimentacaoEstoque.objects.values('tipo', 'quantidade', 'motivo')))"
+==============================================
+docker compose exec djangoapp python manage.py check
+=============================================================================

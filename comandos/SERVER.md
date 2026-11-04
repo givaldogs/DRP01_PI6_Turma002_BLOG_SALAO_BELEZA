@@ -65,7 +65,9 @@ cd ~/agendarepo
 git init --bare
 cd ..
 cd ~/agendaapp
+cd ~/blogapp
 git init
+git clone https://github.com/givaldogs/DRP01_PI5_Turma002_BLOG_SALAO_BELEZA.git .
 git remote add agendarepo ~/agendarepo
 git remote add blogrepo ~/blogrepo
 git add .

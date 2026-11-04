@@ -131,3 +131,8 @@ GitHub.sublime-settings
 
 # History (se usa alguma extensão para versionar histórico local)
 .history
+
+# Cópias temporárias de arquivos
+djangoapp/estoque/views copy.py
+comandos/gunicorn copy.txt
+comandos/nginx-http copy.txt

@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>{% block title %}Controle de Estoque{% endblock %}</title>
+    <title>{% block title %}Controle de Estoque{% endblock %} {{ site_setup.title }}</title>
 
     <link rel="stylesheet" href="{% static 'estoque/css/estoque.css' %}">
     {% block extra_css %}{% endblock %}
@@ -15,7 +15,7 @@
 <body>
     <header class="topo">
         <div class="container">
-            <h1>Maria Salão de Beleza</h1>
+            <h1>{{ site_setup.title }}</h1>
             <p>Sistema de Controle de Estoque</p>
         </div>
     </header>
@@ -52,7 +52,7 @@
     </main>
 
     <footer class="rodape">
-        <p>Maria Salão de Beleza - Controle de Estoque</p>
+        <p>{{ site_setup.title }} - Controle de Estoque</p>
     </footer>
 </body>
 

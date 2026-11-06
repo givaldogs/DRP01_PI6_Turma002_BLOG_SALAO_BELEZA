@@ -275,3 +275,11 @@ docker compose exec djangoapp python manage.py shell -c "from estoque.models imp
 ==============================================
 docker compose exec djangoapp python manage.py check
 =============================================================================
+usuario univesp
+senha blog123456
+====================================================================
+git diff -- djangoapp/project/settings.py
+Ele mostrará somente as mudanças no arquivo de configurações do Django. 
+Quero verificar se não há dados sensíveis, como senhas, chaves secretas 
+ou configurações específicas do computador.
+==============================================================================

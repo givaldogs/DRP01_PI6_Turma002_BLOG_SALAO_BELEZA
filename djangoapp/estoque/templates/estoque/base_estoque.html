@@ -31,7 +31,9 @@
                 Movimentar Estoque
             </a>
 
-            <a href="/admin/">Administração</a>
+            {% if user.is_authenticated and user.is_staff %}
+               <a href="/admin/">Administração</a>
+            {% endif %}
 
         </div>
     </nav>

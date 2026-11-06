@@ -248,6 +248,9 @@ AXES_FAILURE_LIMIT = 3
 AXES_COOLOFF_TIME = 1  # 1 Hora
 AXES_RESET_ON_SUCCESS = True
 
+LOGIN_URL = '/estoque/login/'
+LOGIN_REDIRECT_URL = '/estoque/'
+LOGOUT_REDIRECT_URL = '/'
 '''
 try:
     from project.local_settings import *

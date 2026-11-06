@@ -1,0 +1,36 @@
+{% extends 'estoque/base_estoque.html' %}
+
+{% block title %}Login - Controle de Estoque{% endblock %}
+
+{% block content %}
+
+<div class="container" style="max-width: 420px; margin: 50px auto;">
+
+    <h2 class="titulo-pagina">Acesso ao Estoque</h2>
+
+    {% if messages %}
+    {% for message in messages %}
+    <p>{{ message }}</p>
+    {% endfor %}
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <div style="margin-bottom: 15px;">
+            <label for="username">Usuário</label>
+            <input type="text" name="username" id="username" required style="width: 100%; padding: 10px;">
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label for="password">Senha</label>
+            <input type="password" name="password" id="password" required style="width: 100%; padding: 10px;">
+        </div>
+
+        <button type="submit">Entrar</button>
+
+    </form>
+
+</div>
+
+{% endblock %}

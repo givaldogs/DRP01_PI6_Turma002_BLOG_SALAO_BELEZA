@@ -41,3 +41,8 @@ sudo chmod o+rx /home/blogunivesp/blogapp/data/web/static
 sudo chmod o+r /home/blogunivesp/blogapp/data/web/static/blog/css/*.css
 ---------------------------------------------------------
 
+../venv/bin/python manage.py shell -c "from django.contrib.auth import get_user_model; U=get_user_model(); [print(f'Usuário: {u.username} | staff: {u.is_staff} | superuser: {u.is_superuser} | ativo: {u.is_active}') for u in U.objects.all()]"
+
+../venv/bin/python manage.py shell -c "from getpass import getpass; from django.contrib.auth import get_user_model; U=get_user_model(); nome='blogsalao'; exec(\"if U.objects.filter(username=nome).exists(): raise SystemExit('Esse usuário já existe.')\"); senha=getpass('Digite a senha para blogsalao: '); confirmacao=getpass('Confirme a senha: '); exec(\"if not senha or senha != confirmacao: raise SystemExit('Senhas vazias ou diferentes. Usuário não criado.')\"); u=U.objects.create_user(username=nome, password=senha, is_staff=False, is_superuser=False, is_active=True); print('Usuário blogsalao criado com sucesso!')"
+
+../venv/bin/python manage.py shell -c "from django.contrib.auth import get_user_model; u=get_user_model().objects.get(username='blogsalao'); print('Usuário:',u.username); print('is_staff:',u.is_staff); print('is_superuser:',u.is_superuser); print('is_active:',u.is_active)"
